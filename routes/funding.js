@@ -4,8 +4,6 @@ var axios = require('axios');
 
 const Funding = require('../models/Funding').Funding;
 
-//funding 생성
-//funding 조회
 //funding 하기
 //내가 펀딩한거 조회
 
@@ -47,5 +45,26 @@ router.post('/create', (req, res) => {
         });
     }
 });
+
+router.get('/get/:wallet', (req, res) => {
+    const wallet = req.params.wallet;
+    Funding.findOne({server_wallet : wallet}, (err, funding) => {
+        if(!funding) {
+            res.status(404).json({message : "펀딩이 없습니다."})
+        } else {
+            res.json({message : "펀딩 조회에 성공했습니다!", funding: funding});
+        }
+    });
+});
+
+router.get('/get_all', (req, res) => {
+    Funding.find({}, (err, fundings) => {
+        if(!fundings) {
+            res.status(404).json({message : "펀딩이 없습니다."})
+        } else {
+            res.json({message : "펀딩 조회에 성공했습니다", fundings : fundings});
+        }
+    })
+})
 
 module.exports = router;
