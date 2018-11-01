@@ -15,9 +15,10 @@ router.get('/', function (req, res, next) {
 router.post('/register', (req, res) => {
     const email = req.body.email;
     const wallet = req.body.wallet;
-    if(!validator.validate(email) || !wallet) {
+    const name = req.body.name;
+    if(!validator.validate(email) || !wallet || !name) {
         res.status(400).json({
-            message : "양식이 잘못되었습니다."
+            message : "이메일, 주소 또는 이름을 확인해주세요."
         });
     } else {
         User.findOne({wallet : wallet}, (err, user) => {
@@ -26,7 +27,8 @@ router.post('/register', (req, res) => {
             } else {
                 var newUser = new User({
                     email : email,
-                    wallet : wallet
+                    wallet : wallet,
+                    name : name
                 });
                 newUser.save();
                 res.status(200).json({
