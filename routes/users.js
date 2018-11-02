@@ -40,6 +40,19 @@ router.post('/register', (req, res) => {
     }
 });
 
+router.post('/login', (req, res) => {
+    var email = req.body.email;
+    var wallet = req.body.wallet;
+    
+    User.findOne({email : email, wallet : wallet}, (err, user) => {
+        if(!user) {
+            res.status(404).json({message : "해당하는 사용자가 없습니다!"});
+        } else {
+            res.status(200).json({message : "성공적으로 로그인하였습니다!"})
+        }
+    })
+})
+
 router.post('/wallet/create', (req, res) => {
     var server_address;
     var server_private_key;
