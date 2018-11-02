@@ -9,6 +9,8 @@ var fundingSchema = new Schema({
     server_private_key: String,
     server_mnemonic: String,
     server_wallet: String,
+    open_name : String,
+    open_wallet : String,
     members : Array
 });
 

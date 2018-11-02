@@ -6,6 +6,6 @@ var userSchema = new Schema({
     name : String,
     wallet : String,
     enteredWallet : Array
-},{usePushEach : true});
+});
 
 module.exports = userSchema;

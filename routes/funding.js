@@ -3,6 +3,7 @@ var router = express.Router();
 var axios = require('axios');
 
 const Funding = require('../models/Funding').Funding;
+const User = require('../models/User').User;
 
 //funding 하기
 //내가 펀딩한거 조회
@@ -33,6 +34,8 @@ router.post('/create', (req, res) => {
                                 server_wallet: server_wallet,
                                 server_private_key: server_private_key,
                                 server_mnemonic: server_mnemonic,
+                                open_name : opened_name,
+                                open_wallet : opened_wallet,
                                 members : member
                             });
                             newFunding.save();
@@ -65,6 +68,58 @@ router.get('/get_all', (req, res) => {
             res.json({message : "펀딩 조회에 성공했습니다", fundings : fundings});
         }
     })
-})
+});
+
+router.post('/funding', (req, res) => {
+    var name = req.body.name;
+    var from_wallet = req.body.server_wallet;
+    var from_private_key = req.body.server_privateKey;
+    var walletAddress = req.body.to_wallet;
+    var amount = req.body.amount;
+
+    User.findOne({wallet : from_wallet}, (err, user) => {
+        if(user) {
+            Funding.findOne({server_wallet: walletAddress}, (err, funding) => {
+                if (!funding) {
+                    res.status(404).json({message: "해당하는 펀딩을 찾을 수 없습니다."});
+                } else {
+                    axios.post('http://purplebeen.kr:2442/api/v1/signedtx', {
+                        privateKey: from_private_key,
+                        from: from_wallet,
+                        to: walletAddress,
+                        amount: amount,
+                        fee: 0.0001
+                    }).then(response => {
+                        console.log('test');
+                        console.log(response.data);
+                        axios.get(`http://purplebeen.kr:2442/api/v1/wallet/${walletAddress}/balance`)
+                            .then(response => {
+                                var member = {name: name, wallet: walletAddress};
+                                console.log(member);
+                                funding.members.push(member);
+                                funding.save();
+                                var wallet = {wallet : walletAddress};
+                                user.enteredWallet.push(wallet);
+                                user.save();
+                                res.status(200).json({
+                                    message: "펀딩에 성공하였습니다!",
+                                    wallet: walletAddress,
+                                    balance: response.data.balance,
+                                });
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            });
+                    });
+                }
+            })
+        } else {
+            res.status(404).json({message : "사용자를 찾을 수 없습니다!"});
+        }
+    })
+
+});
+
+
 
 module.exports = router;

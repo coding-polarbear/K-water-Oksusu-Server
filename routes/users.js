@@ -57,6 +57,7 @@ router.post('/wallet/create', (req, res) => {
                 amount : 1000,
                 fee : 0.0001
                 }).then(response => {
+                    console.log('test');
                     console.log(response.data);
                     res.status(200).json({
                         message : 'success',
